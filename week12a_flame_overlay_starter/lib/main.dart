@@ -6,6 +6,8 @@ import 'overlay_main.dart';
 import 'overlay_pause.dart';
 import 'overlay_info.dart';
 import 'overlay_settings.dart';
+import 'package:provider/provider.dart';
+import 'game_provider.dart';
 
 import 'game.dart';
 
@@ -13,7 +15,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Flame.device.fullScreen();
 
-  runApp(const MainApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => GameProvider(),
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -24,8 +31,8 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: GameWidget(
-          game: OverlayTutorial(context)
+        body: GameWidget.controlled(
+          gameFactory: () => OverlayTutorial(context)
             ..paused = true, // Cascade to pause immediately
           overlayBuilderMap: {
             'title': (context, game) {
@@ -38,7 +45,9 @@ class MainApp extends StatelessWidget {
               return pauseOverlay(context, game);
             },
             'info': (context, game) {
-              return InfoOverlay(game: game as OverlayTutorial); // Cast required!
+              return InfoOverlay(
+                game: game as OverlayTutorial,
+              ); // Cast required!
             },
             'settings': (context, game) {
               return settingsOverlay(context, game);
